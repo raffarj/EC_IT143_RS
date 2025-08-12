@@ -1,0 +1,1 @@
+-- Q: How much was spent on MAPPLE?
