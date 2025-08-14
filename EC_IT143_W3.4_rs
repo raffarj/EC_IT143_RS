@@ -1,0 +1,155 @@
+/*****************************************************************************************************************
+NAME:    dbo.v_
+PURPOSE: Solves eight questions about the AdventureWorks database
+
+MODIFICATION LOG:
+Ver      Date        Author        Description
+-----   ----------   -----------   -------------------------------------------------------------------------------
+1.0     02/28/2022   JJAUSSI       1. Built this view for EC IT143
+
+
+RUNTIME: 
+0m 0s
+
+NOTES: 
+The purpose of this view is to solves eight questions about the AdventureWorks database
+ 
+******************************************************************************************************************/
+-- Q1 Business User question—Marginal complexity: What are the top ten most expensive products in terms of list price?
+Q1
+SELECT TOP 10
+    Name
+FROM
+    Production.Product
+ORDER BY
+    ListPrice DESC;
+
+-- Q2 Business User question—Marginal complexity: Which city has the highest number of registered persons?
+Q2
+SELECT
+    D.Name AS DepartmentName,
+    COUNT(E.BusinessEntityID) AS NumberOfEmployees
+FROM
+    HumanResources.Department AS D
+JOIN
+    HumanResources.EmployeeDepartmentHistory AS EDH ON D.DepartmentID = EDH.DepartmentID
+JOIN
+    HumanResources.Employee AS E ON EDH.BusinessEntityID = E.BusinessEntityID
+WHERE
+    EDH.EndDate IS NULL -- This filters for current employees
+GROUP BY
+    D.Name
+ORDER BY
+    D.Name;
+
+-- Q3 Business User question—Moderate complexity: I’m looking to compare average list prices between road bikes and mountain bikes. Can you show me the average list price for each type?
+
+SELECT
+    PSC.Name AS ProductCategory,
+    AVG(P.ListPrice) AS AverageListPrice
+FROM
+    Production.Product AS P
+INNER JOIN
+    Production.ProductSubcategory AS PSC ON P.ProductSubcategoryID = PSC.ProductSubcategoryID
+WHERE
+    PSC.Name IN ('Road Bikes', 'Mountain Bikes')
+GROUP BY
+    PSC.Name;
+GO
+
+-- Q4 Business User question—Moderate complexity: Which sales representatives have sold more than 50 orders, and what are their total sales amounts?
+
+SELECT
+    P.FirstName + ' ' + P.LastName AS SalespersonName,
+    COUNT(SOH.SalesOrderID) AS NumberOfOrders,
+    SUM(SOH.TotalDue) AS TotalSalesAmount
+FROM
+    Sales.SalesOrderHeader AS SOH
+INNER JOIN
+    Sales.SalesPerson AS SP ON SOH.SalesPersonID = SP.BusinessEntityID
+INNER JOIN
+    Person.Person AS P ON SP.BusinessEntityID = P.BusinessEntityID
+GROUP BY
+    P.FirstName,
+    P.LastName
+HAVING
+    COUNT(SOH.SalesOrderID) > 50
+ORDER BY
+    TotalSalesAmount DESC;
+GO
+
+-- Q5 Business User question—Increased complexity: Our regional manager wants to reward top salespeople. Who were the top five salespeople based on total sales in 2013? Include their names, territories, and total sales.
+
+SELECT TOP 5
+    P.FirstName + ' ' + P.LastName AS SalespersonName,
+    ST.Name AS SalesTerritory,
+    SUM(SOH.TotalDue) AS TotalSales
+FROM
+    Sales.SalesOrderHeader AS SOH
+INNER JOIN
+    Sales.SalesPerson AS SP ON SOH.SalesPersonID = SP.BusinessEntityID
+INNER JOIN
+    Person.Person AS P ON SP.BusinessEntityID = P.BusinessEntityID
+INNER JOIN
+    Sales.SalesTerritory AS ST ON SOH.TerritoryID = ST.TerritoryID
+WHERE
+    YEAR(SOH.OrderDate) = 2013
+GROUP BY
+    P.FirstName,
+    P.LastName,
+    ST.Name
+ORDER BY
+    TotalSales DESC;
+GO
+
+-- Q6 Business User question—Increased complexity: The executive team is analyzing sales trends from Q1 2012. They want a report showing the total sales amount, average unit price, and order quantity by product category during that period. Make sure to sort by total sales.
+
+
+SELECT
+    PC.Name AS ProductCategory,
+    SUM(SOD.OrderQty * SOD.UnitPrice) AS TotalSalesAmount,
+    AVG(SOD.UnitPrice) AS AverageUnitPrice,
+    SUM(SOD.OrderQty) AS TotalOrderQuantity
+FROM
+    Sales.SalesOrderHeader AS SOH
+INNER JOIN
+    Sales.SalesOrderDetail AS SOD ON SOH.SalesOrderID = SOD.SalesOrderID
+INNER JOIN
+    Production.Product AS P ON SOD.ProductID = P.ProductID
+INNER JOIN
+    Production.ProductSubcategory AS PSC ON P.ProductSubcategoryID = PSC.ProductSubcategoryID
+INNER JOIN
+    Production.ProductCategory AS PC ON PSC.ProductCategoryID = PC.ProductCategoryID
+WHERE
+    SOH.OrderDate BETWEEN '2012-01-01' AND '2012-03-31'
+GROUP BY
+    PC.Name
+ORDER BY
+    TotalSalesAmount DESC;
+GO
+
+
+-- Q7 Metadata question: Which tables in the database have a column named HireDate? Use INFORMATION_SCHEMA.COLUMNS.
+
+
+SELECT
+    TABLE_SCHEMA,
+    TABLE_NAME
+FROM
+    INFORMATION_SCHEMA.COLUMNS
+WHERE
+    COLUMN_NAME = 'HireDate';
+GO
+
+-- Q8 Metadata question: List all views that reference the SalesOrderDetail table by inspecting their definitions in INFORMATION_SCHEMA.VIEWS.
+
+SELECT
+    VIEW_SCHEMA,
+    VIEW_NAME
+FROM
+    INFORMATION_SCHEMA.VIEWS
+WHERE
+    VIEW_DEFINITION LIKE '%SalesOrderDetail%';
+GO
+
+
