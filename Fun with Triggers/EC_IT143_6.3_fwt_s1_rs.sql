@@ -1,2 +1,1 @@
-
---Q:ow can I store the username that last updated each row in t_w3_schools_customers?s
+-- How can I track the date and time when a customer record is updated?
