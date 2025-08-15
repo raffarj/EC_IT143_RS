@@ -1,0 +1,93 @@
+/*****************************************************************************************************************
+NAME:    EC_IT143_W5.2_MyFC_rs.sql
+PURPOSE: Solves four questions about the MyFC dataset.
+
+MODIFICATION LOG:
+Ver      Date        Author        Description
+-----   ----------   -----------   -------------------------------------------------------------------------------
+1.0     08/11/2025   rs            1. Built this script for IT143 assignment 5.2
+
+RUNTIME:
+0m 0s
+
+NOTES:
+This script demonstrates how to translate business questions into functional T-SQL queries
+for the MyFC database, combining different levels of complexity and table joins.
+
+******************************************************************************************************************/
+
+-- Q1: What are the top ten most expensive products in terms of list price?
+-- Author: Me
+-- A1: This query adapts the question to find the 10 players with the highest salaries,
+--     joining the fact and player dimension tables.
+
+SELECT TOP 10
+    PD.pl_first_name + ' ' + PD.pl_last_name AS PlayerName,
+    PF.mtd_salary AS CurrentSalary
+FROM
+    dbo.tblPlayerFact AS PF
+INNER JOIN
+    dbo.tblPlayerDim AS PD ON PF.pl_id = PD.pl_id
+ORDER BY
+    PF.mtd_salary DESC;
+GO
+
+-- Q2: How many players do we have in each position?
+-- Author: Me
+-- A2: This query groups players by position and returns the count of players in each one.
+
+SELECT
+    P.pos_name AS PositionName,
+    COUNT(PD.pl_id) AS NumberOfPlayers
+FROM
+    dbo.tblPlayerDim AS PD
+INNER JOIN
+    dbo.tblPositionDim AS P ON PD.pos_id = P.pos_id
+GROUP BY
+    P.pos_name
+ORDER BY
+    NumberOfPlayers DESC;
+GO
+
+-- Q3: Which players from tblPlayerDim have the top three highest month-to-date salaries (mtd_salary) in tblPlayerFact, and what are their positions and team IDs?
+-- Author: KAYEYE BINENE Theophile Binene
+-- A3: This query uses TOP 3 and JOINs to find the players with the highest salaries and their respective position and team information.
+
+SELECT TOP 3
+    PD.pl_first_name + ' ' + PD.pl_last_name AS PlayerName,
+    P.pos_name AS Position,
+    TD.team_name AS Team,
+    PF.mtd_salary AS CurrentSalary
+FROM
+    dbo.tblPlayerFact AS PF
+INNER JOIN
+    dbo.tblPlayerDim AS PD ON PF.pl_id = PD.pl_id
+INNER JOIN
+    dbo.tblPositionDim AS P ON PD.pos_id = P.pos_id
+INNER JOIN
+    dbo.tblTeamDim AS TD ON PD.team_id = TD.team_id
+ORDER BY
+    PF.mtd_salary DESC;
+GO
+
+-- Q4: What is the average salary per position in the last 12 months?
+-- Author: Me
+-- A4: This query calculates the average salary for each player position
+--     using the AVG function, grouping by p_id and filtering by date.
+
+SELECT
+    P.pos_name AS PositionName,
+    AVG(PF.mtd_salary) AS AverageSalary
+FROM
+    dbo.tblPlayerFact AS PF
+INNER JOIN
+    dbo.tblPlayerDim AS PD ON PF.pl_id = PD.pl_id
+INNER JOIN
+    dbo.tblPositionDim AS P ON PD.pos_id = P.pos_id
+WHERE
+    PF.as_of_date >= DATEADD(year, -1, GETDATE())
+GROUP BY
+    P.pos_name
+ORDER BY
+    AverageSalary DESC;
+GO
