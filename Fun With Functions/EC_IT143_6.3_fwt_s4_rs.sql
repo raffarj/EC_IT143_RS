@@ -5,7 +5,7 @@
 -- Google search "How to extract first name from combined name tsql stack overflow"
 -- https://stackoverflow.com/questions/5145791/extracting-first-name-and-last-name
 
-SELECT t.ContactName
-	, LEFT(t.ContactName, CHARINDEX(' ', t.ContactName + ' ') - 1) AS frist_name
-	FROM dbo.t_w3_schools_customers AS t
-ORDER BY 1;
+SELECT 
+    ContactName,
+    SUBSTRING(ContactName, 1, CHARINDEX(' ', ContactName) - 1) AS FirstName
+FROM dbo.t_w3_schools_customers;
