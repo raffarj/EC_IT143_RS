@@ -1,0 +1,102 @@
+/*****************************************************************************************************************
+NAME:    EC_IT143_W5.2_Simpsons_rs.sql
+PURPOSE: Solves four questions about the Simpsons dataset.
+
+MODIFICATION LOG:
+Ver      Date        Author        Description
+-----   ----------   -----------   -------------------------------------------------------------------------------
+1.0     08/11/2025   rs            1. Built this script for IT143 assignment 5.2
+
+RUNTIME:
+0m 0s
+
+NOTES:
+This script demonstrates how to translate business questions into functional T-SQL queries.
+
+******************************************************************************************************************/
+
+-- Q1: What is the total amount spent by Marge and Homer in a specific year?
+-- Author: Me
+-- A1: This query calculates the sum of debits for Marge and Homer in a specific year,
+--     using the FBS_Viza_Costmo table.
+
+SELECT
+    "Member Name",
+    SUM(Debit) AS TotalSpent
+FROM
+    dbo.FBS_Viza_Costmo
+WHERE
+    "Member Name" IN ('Marge Simpson', 'Homer Simpson')
+    AND YEAR(Date) = 1989
+GROUP BY
+    "Member Name";
+GO
+
+-- Q2: What is the job title with the highest number of family members?
+-- Author: Me
+-- A2: This query counts the number of family members for each 'Job Title'
+--     in the Family_Data table and returns the most common title.
+
+SELECT TOP 1
+    "Job Title",
+    COUNT(*) AS NumberOfMembers
+FROM
+    dbo.Family_Data
+GROUP BY
+    "Job Title"
+ORDER BY
+    NumberOfMembers DESC;
+GO
+
+-- Q3: Which category in the Planet_Express table has the highest total amount spent? Are most expenses tied to a specific 'Card_Member'?
+-- Author: Kalemba Faith Esther
+-- A3: This query uses CTEs to find the category with the highest total spend and the members
+--     with the highest number of transactions in that category.
+
+WITH CategoryTotals AS (
+    SELECT
+        Category,
+        SUM(Amount) AS TotalAmount
+    FROM dbo.Planet_Express
+    GROUP BY Category
+),
+TopCategory AS (
+    SELECT TOP 1
+        Category,
+        TotalAmount
+    FROM CategoryTotals
+    ORDER BY TotalAmount DESC
+),
+MemberTotals AS (
+    SELECT
+        "Card Member",
+        COUNT(*) AS TransactionCount
+    FROM dbo.Planet_Express
+    WHERE Category = (SELECT Category FROM TopCategory)
+    GROUP BY "Card Member"
+)
+SELECT
+    tc.Category,
+    tc.TotalAmount,
+    mt."Card Member",
+    mt.TransactionCount
+FROM TopCategory AS tc
+LEFT JOIN MemberTotals AS mt ON 1=1
+ORDER BY mt.TransactionCount DESC;
+GO
+
+-- Q4: What is the average transaction amount for each spending category?
+-- Author: Me
+-- A4: This query calculates the average transaction amount for each category
+--     in the Planet_Express table, using the AVG function.
+
+SELECT
+    Category,
+    AVG(Amount) AS AverageTransactionAmount
+FROM
+    dbo.Planet_Express
+GROUP BY
+    Category
+ORDER BY
+    AverageTransactionAmount DESC;
+GO
