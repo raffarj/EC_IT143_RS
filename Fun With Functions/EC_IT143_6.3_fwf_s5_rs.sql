@@ -1,4 +1,4 @@
-/
+/*
 ***********************************************************************************
 ******************************
 NAME: dbo.t_w3_schools_customers
@@ -15,6 +15,11 @@ NOTES
 This script encontra e separa o primeiro nome do resto do nome
 ***********************************************************************************
 *******************************/
--- Q:How to extract first name from Contact Name?
--- A: Well, here is your problem..
-SELECT GETDATE() AS my_date;
+
+
+CREATE OR ALTER FUNCTION dbo.fn_GetFirstName (@FullName VARCHAR(100))
+RETURNS VARCHAR(100)
+AS
+BEGIN
+    RETURN SUBSTRING(@FullName, 1, CHARINDEX(' ', @FullName + ' ') - 1)
+END;
