@@ -12,7 +12,7 @@ RUNTIME:
 0m 0s
 NOTES
 :
-This is where I talk about what this script is, why I built it, and other stuff...
+This script encontra e separa o primeiro nome do resto do nome
 ***********************************************************************************
 *******************************/
 -- Q:How to extract first name from Contact Name?
