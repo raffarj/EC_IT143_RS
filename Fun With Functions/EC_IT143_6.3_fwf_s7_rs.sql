@@ -7,7 +7,7 @@ MODIFICATION LOG:
 Ver Date Author Description
 ----- ---------- -----------
 -------------------------------------------------------------------------------
-1.0 05/23/2022 JJAUSSI 1. Built this script for EC IT440
+1.0 05/23/2022 RSousa 1. Built this script for EC IT143
 RUNTIME:
 0m 0s
 NOTES
